@@ -3,6 +3,8 @@
 require 'vizkit'
 require 'optparse'
 
+
+
 def try_to_get_task(task_name, retry_on_error=true)
     task = nil
     begin
@@ -113,7 +115,14 @@ elsif use_test_gui
         sample = ctrl_gui.getJoints()
         vis_gui.updateData(sample)
     end
+    
     layout.add_widget(ctrl_gui)
+    
+    require 'control_ui/joints_exporter'
+    
+    jtsexp_gui = JointsExporter.new(ctrl_gui)
+    layout.add_widget(jtsexp_gui)
+
     main.show
 end
 
