@@ -102,8 +102,7 @@ if not @state_task_name.empty?
 elsif use_test_gui
     main = Qt::Widget.new
     layout = Qt::VBoxLayout.new(main)
-    layout.add_widget(view3d)
-
+    
     ctrl_gui = Vizkit.default_loader.ControlUi
     override_vel_limits=0
     only_positive=true
@@ -111,11 +110,25 @@ elsif use_test_gui
     no_velocity=true
     ctrl_gui.configureUi(override_vel_limits, only_positive, no_effort, no_velocity)
     ctrl_gui.initFromURDF(model_file.dup)
+    
+    
+    require 'control_ui/port_connector'
+    
+    prtcon_gui = PortConnector.new
+    layout.add_widget(prtcon_gui)
+    
     ctrl_gui.connect(SIGNAL('sendSignal()')) do 
         sample = ctrl_gui.getJoints()
-        vis_gui.updateData(sample)
+        prtcon_gui.sendData(sample)
     end
     
+    prtcon_gui.connect(SIGNAL('receivedData()')) do
+        sample = prtcon_gui.getData()
+        vis_gui.updateData(sample)
+        ctrl_gui.setJointState(sample)
+    end
+    
+    layout.add_widget(view3d)
     layout.add_widget(ctrl_gui)
     
     require 'control_ui/joints_exporter'
